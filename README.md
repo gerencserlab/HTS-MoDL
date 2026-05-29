@@ -1,9 +1,53 @@
-# MoDL
-Mitochondrial segmentation and function prediction in live-cell images with deep learning
+# HTS-MoDL
+HTS adaptation of MoDL mitochondrial segmentation and function prediction in live-cell images with deep learning
 
 ## Description
-MoDL is a deep learning-based software package for precise mitochondrial segmentation and function prediction in live-cell images, and allows for visualization and outputs detailed data on mitochondrion morphology features and functionality.
+MoDL is a deep learning-based software package for precise mitochondrial segmentation and function prediction in live-cell images, and allows for visualization and outputs detailed data on mitochondrion morphology features and functionality. In this fork of the original repository we adapted MoDL to our high-throughput screening workflows.
 
+## Changes to segmentation prediction
+ * Arbitrary image input size
+ * Image upscaling to work on different resolution images
+ * Smooth stitching
+ * Command line arguments
+ * Flask server / service operation for Image Analyst MKII-based workflows    
+
+## Command line usage
+
+```
+.\.venv\Scripts\python.exe .\MoDL_seg\segment_predict_flexible.py `
+  --input .\testraw\your_image.tif `
+  --overlap 64 `
+  --scale 2 `
+  --output-original-size
+```
+
+## API usage (POST http://127.0.0.1:5002/segment)
+```
+python.exe .\segment_predict_server.py
+
+Invoke-RestMethod -Uri http://127.0.0.1:5002/segment -Method Post -Form @{
+  "--dir" = "C:\0Git\MoDL\testraw\your_image.tif"
+  "--overlap" = "64"
+  "--scale" = "1.0"
+  "--threshold" = "0.7"
+  "--batch-size" = "1"
+}
+```
+
+## API fields
+```
+--dir
+--model
+--overlap
+--scale
+--threshold
+--batch-size
+--output-original-size
+```
+
+
+
+### Original description
 ***
 
 ## Table of Contents
