@@ -1,0 +1,14 @@
+.venv/
+bin/
+*.pth
+*.npz
+*.png
+*.npy
+*.csv
+*.tif
+*.tiff
+*.gif
+*.pkl
+*.xlsx
+__pycache__/
+model/*.*
