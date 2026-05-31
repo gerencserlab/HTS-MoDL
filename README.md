@@ -47,7 +47,7 @@ Invoke-RestMethod -Uri http://127.0.0.1:5002/segment -Method Post -Form @{
 
 
 
-### Original description
+### Modified original description
 ***
 
 ## Table of Contents
@@ -73,7 +73,7 @@ MoDL is built with Python and Tensorflow. Technically there are no limits to the
 The inference process has been tested with:
 
  * Windows 11 (version 23H2)
- * Python 3.8.0 (64 bit)
+ * Python 3.8.10 (Maybe 3.9, but not higher) (64 bit)
  * tensorflow 2.5.0
  * 11th Gen Intel(R) Core(TM) i7-11700 @ 2.50GHz
  * NVIDIA GeForce RTX 3060 Ti
@@ -83,10 +83,10 @@ The inference process has been tested with:
 ## Installation
 
 1. Install python 3.8.0 
-2. (Optional) If your computer has a CUDA-enabled GPU, install the CUDA and CUDNN of the proper version.
+2. (Optional) If your computer has a CUDA-enabled GPU, install the CUDA and CUDNN of the proper version. Have them in the PATH.
 3. The directory tree has been built. Download the MoDL_main.zip and unpack it, or clone the repository: 
 ```
-git clone https://github.com/OBPNPU2024/MoDL.git
+git clone https://github.com/gerencserlab/HTS-MoDL
 ```
 
 4. Open the terminal in the MoDL directory, install the required dependencies using pip:
@@ -95,11 +95,6 @@ git clone https://github.com/OBPNPU2024/MoDL.git
 pip install -r requirements.txt
 ```
 
-5. (Optional) If you have had the CUDA environment installed properly, run:
-
-```
-pip install tensorflow-gpu=2.5.0
-```
 
 The installation takes about 10 minutes in the tested platform. The time could be longer due to the network states.
 

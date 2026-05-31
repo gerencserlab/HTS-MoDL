@@ -1,5 +1,8 @@
 import io
 import os
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
+import sys
 import numpy as np
 import cv2
 from scipy.ndimage import morphology
@@ -10,6 +13,169 @@ from scipy.stats import kurtosis
 from scipy.stats import skew
 from skimage.morphology import convex_hull_image
 import pandas as pd
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_UPLOAD_PATH = PROJECT_ROOT / "final_results" / "bw"
+DEFAULT_SAVE_FOLDER = PROJECT_ROOT / "results"
+DEFAULT_PATCH_RESULTS_FOLDER = PROJECT_ROOT / "final_results" / "512x512_pixels"
+WORKER_MITO_LABELS = None
+WORKER_IMAGE_SHAPE = None
+
+
+def init_mito_worker(mito_labels, image_shape):
+    global WORKER_MITO_LABELS
+    global WORKER_IMAGE_SHAPE
+    WORKER_MITO_LABELS = mito_labels
+    WORKER_IMAGE_SHAPE = image_shape
+
+
+def print_progress_bar(current, total, prefix="", width=40):
+    if total <= 0:
+        return
+    filled = int(width * current / total)
+    bar = "#" * filled + "-" * (width - filled)
+    percent = 100 * current / total
+    sys.stdout.write(f"\r{prefix} [{bar}] {current}/{total} ({percent:5.1f}%)")
+    sys.stdout.flush()
+    if current >= total:
+        sys.stdout.write("\n")
+        sys.stdout.flush()
+
+
+def mito_prop_to_task(index, prop):
+    return {
+        "index": index,
+        "label": prop.label,
+        "area": prop.area,
+        "eccentricity": prop.eccentricity,
+        "equivalent_diameter": prop.equivalent_diameter,
+        "euler_number": prop.euler_number,
+        "extent": prop.extent,
+        "major_axis_length": prop.major_axis_length,
+        "minor_axis_length": prop.minor_axis_length,
+        "orientation": prop.orientation,
+        "perimeter": prop.perimeter,
+        "solidity": prop.solidity,
+        "centroid": prop.centroid,
+    }
+
+
+def process_mito_prop(task):
+    label = task["label"]
+    label_mask = np.zeros(WORKER_IMAGE_SHAPE, dtype="uint8")
+    label_mask[WORKER_MITO_LABELS == label] = 255
+
+    number_branches = 0
+    total_branch_length = 0
+    mean_branch_length = 0
+    median_branch_length = 0
+    std_branch_length = 0
+    mean_branch_angle = 0
+    median_branch_angle = 0
+    std_branch_angle = 0
+    total_density = 0
+    average_density = 0
+    median_density = 0
+
+    try:
+        skeleton = thin(label_mask)
+        skeleton = 255 * skeleton
+        branch_points = getSkeletonIntersection(skeleton)
+
+        branch_point_mask = np.zeros(shape=WORKER_IMAGE_SHAPE, dtype=np.uint8)
+        for x_pos, y_pos in branch_points:
+            branch_point_mask[y_pos, x_pos] = 255
+
+        kernel = np.ones((3, 3), np.uint8)
+        dilated_branch_points = cv2.dilate(branch_point_mask, kernel, iterations=1)
+
+        branch_length_matrix = skeleton - dilated_branch_points
+        branch_matrix = branch_length_matrix > 0
+        branch_labels = measure.label(np.array(branch_matrix), connectivity=2)
+        number_branches = branch_labels.max()
+        branch_props = regionprops(branch_labels)
+
+        branch_length = []
+        branch_angle = []
+        dist_transform = cv2.distanceTransform(label_mask, cv2.DIST_L2, 5)
+        positive_distances = dist_transform[dist_transform > 0]
+
+        for branch_prop in branch_props:
+            branch_length.append(branch_prop.area + 4)
+            branch_angle.append(branch_prop.orientation)
+
+        if len(branch_length) == 1:
+            branch_length[0] = task["major_axis_length"]
+
+        if branch_length:
+            branch_angle = np.multiply(branch_angle, (180 / np.pi))
+            total_branch_length = np.sum(branch_length)
+            mean_branch_length = np.mean(branch_length)
+            median_branch_length = np.median(branch_length)
+            std_branch_length = np.std(branch_length)
+            mean_branch_angle = np.mean(branch_angle)
+            median_branch_angle = np.median(branch_angle)
+            std_branch_angle = np.std(branch_angle)
+
+        if positive_distances.size:
+            total_density = np.sum(positive_distances)
+            average_density = np.mean(positive_distances)
+            median_density = np.median(positive_distances)
+
+    except Exception:
+        pass
+
+    centroid = task["centroid"]
+    return {
+        "index": task["index"],
+        "area": task["area"],
+        "eccentricity": task["eccentricity"],
+        "equivalent_diameter": task["equivalent_diameter"],
+        "euler_number": task["euler_number"],
+        "extent": task["extent"],
+        "major_axis_length": task["major_axis_length"],
+        "minor_axis_length": task["minor_axis_length"],
+        "orientation": task["orientation"],
+        "perimeter": task["perimeter"],
+        "solidity": task["solidity"],
+        "centroid": centroid,
+        "centroid_x": centroid[0],
+        "centroid_y": centroid[1],
+        "branch_count": number_branches,
+        "total_branch_length": total_branch_length,
+        "mean_branch_length": mean_branch_length,
+        "median_branch_length": median_branch_length,
+        "std_branch_length": std_branch_length,
+        "mean_branch_angle": mean_branch_angle,
+        "median_branch_angle": median_branch_angle,
+        "std_branch_angle": std_branch_angle,
+        "total_density": total_density,
+        "average_density": average_density,
+        "median_density": median_density,
+    }
+
+
+def process_mito_props_parallel(file_name, img, mito_labels, mito_props):
+    tasks = [mito_prop_to_task(index, prop) for index, prop in enumerate(mito_props) if prop.area > 16]
+    if not tasks:
+        return []
+
+    results = []
+    max_workers = os.cpu_count() or 1
+    progress_prefix = f"Mitochondria {file_name}"
+    print_progress_bar(0, len(tasks), progress_prefix)
+    with ProcessPoolExecutor(
+        max_workers=max_workers,
+        initializer=init_mito_worker,
+        initargs=(mito_labels, img.shape),
+    ) as executor:
+        futures = [executor.submit(process_mito_prop, task) for task in tasks]
+        for completed, future in enumerate(as_completed(futures), start=1):
+            results.append(future.result())
+            print_progress_bar(completed, len(tasks), progress_prefix)
+
+    return sorted(results, key=lambda result: result["index"])
 
 
 def load_and_skeletonize_image(file_path):
@@ -60,6 +226,13 @@ def getSkeletonIntersection(skeleton):
 
 
 def measurement(directory_path, save_path):
+    directory_path = Path(directory_path).resolve()
+    save_path = Path(save_path).resolve()
+    save_path.mkdir(parents=True, exist_ok=True)
+    DEFAULT_PATCH_RESULTS_FOLDER.mkdir(parents=True, exist_ok=True)
+    if not directory_path.is_dir():
+        raise FileNotFoundError(f"Input folder not found: {directory_path}")
+
     database = pd.DataFrame([[0] * 103],
                             columns=['cell_name', 'cell_mean_mito_area_(pixels_squared)',
                                      'cell_median_mito_area_(pixels_squared)',
@@ -156,7 +329,7 @@ def measurement(directory_path, save_path):
                                                      'mito_weighted_distance', 'mito_form_factor', 'mito_roundness'])
 
     test_num = 0
-    files = os.listdir(directory_path)  # 获取目录中的文件列表
+    files = os.listdir(directory_path)  # Get the file list from the directory
     total_file_count = len(files)
     image_extensions = ['.jpg', '.png', '.tif', '.tiff']
 
@@ -164,13 +337,13 @@ def measurement(directory_path, save_path):
         test_num += 1
         if any(file.lower().endswith(ext) for ext in image_extensions):
             try:
-                file_path = os.path.join(directory_path, file)
-                img = cv2.imread(file_path)
+                file_path = directory_path / file
+                img = cv2.imread(str(file_path))
                 img = img[:, :, 0]
                 print("Test", file, f'Test [{np.round(100 * (test_num / total_file_count), 2)}%]')
                 scale = 1
 
-                # 独立线粒体测试
+                # Individual mitochondria analysis
                 mito_labels = measure.label(np.array(img), connectivity=2)
                 mito_props = regionprops(mito_labels)
 
@@ -206,111 +379,32 @@ def measurement(directory_path, save_path):
                 mito_median_density = []
                 mito_branch_count = []
 
-                for r in range(len(mito_props)):
-                    if mito_props[r].area > 16:
-
-                        mito_area.append(mito_props[r].area)
-                        mito_eccentricity.append(mito_props[r].eccentricity)
-                        mito_equi_diameter.append(mito_props[r].equivalent_diameter)
-                        mito_euler_number.append(mito_props[r].euler_number)
-                        mito_extent.append(mito_props[r].extent)
-                        mito_major_axis.append(mito_props[r].major_axis_length)
-                        mito_minor_axis.append(mito_props[r].minor_axis_length)
-                        mito_orientation.append(mito_props[r].orientation)
-                        mito_perimeter.append(mito_props[r].perimeter)
-                        mito_solidity.append(mito_props[r].solidity)
-                        mito_centroid.append(mito_props[r].centroid)
-                        mito_centroid_x.append(mito_props[r].centroid[0])
-                        mito_centroid_y.append(mito_props[r].centroid[1])
-
-                        if mito_props[r].label == 0:
-                            continue
-
-                        else:
-                            labelMask = np.zeros(img.shape, dtype="uint8")
-                            labelMask[mito_labels == mito_props[r].label] = 255
-
-                            BranchPointsPositions = []
-                            branch_points_ctr = []
-                            num_branch_points = 0
-                            number_branches = 0
-                            branch_length = []
-                            branch_angle = []
-
-                            try:
-                                imagebw8 = labelMask
-                                imagebw8 = imagebw8.astype(np.int32)
-                                Skel2 = thin(labelMask)
-                                Skel2 = 255 * Skel2
-                                branch_pointsn = getSkeletonIntersection(Skel2)
-                                number_branchpoints = len(branch_pointsn)
-
-                                bp = np.zeros(shape=(imagebw8.shape[0], imagebw8.shape[1]), dtype=np.uint8)
-                                for ii in range(len(branch_pointsn)):
-                                    xi = branch_pointsn[ii][0]
-                                    yi = branch_pointsn[ii][1]
-                                    BranchPointsPositions.append([yi, xi])
-                                    bp[yi, xi] = 255
-
-                                kernelbp = np.ones((3, 3), np.uint8)
-                                IM = cv2.dilate(bp, kernelbp, iterations=1)
-
-                                BranchLengthMatrix = Skel2 - IM
-                                BranchMatrix = BranchLengthMatrix > 0
-
-                                imagebwlabels2 = measure.label(np.array(BranchMatrix), connectivity=2)
-                                NUMimagebw1 = imagebwlabels2.max()
-
-                                propsbmm = regionprops(imagebwlabels2)
-
-                                dist_transform2 = cv2.distanceTransform(labelMask, cv2.DIST_L2, 5)
-                                for rq in range(len(propsbmm)):
-                                    branch_length.append((propsbmm[rq].area) + 4)
-                                    branch_angle.append(propsbmm[rq].orientation)
-
-                                if len(branch_length) == 1:
-                                    branch_length[0] = mito_props[r].major_axis_length
-
-                                branch_angle = np.multiply(branch_angle, (180 / np.pi))
-                                num_branch_points = number_branchpoints
-                                number_branches = NUMimagebw1
-                                total_branch_length = np.sum(branch_length)
-                                mean_branch_length = np.mean(branch_length)
-                                median_branch_length = np.median(branch_length)
-                                std_branch_length = np.std(branch_length)
-                                mean_branch_angle = np.mean(branch_angle)
-                                median_branch_angle = np.median(branch_angle)
-                                std_branch_angle = np.std(branch_angle)
-
-                            except:
-                                branch_points_ctr.append([])
-                                num_branch_points = 0
-                                number_branches = 0
-                                branch_length.append([])
-                                branch_angle.append([])
-
-                                total_branch_length = 0
-                                mean_branch_length = 0
-                                median_branch_length = 0
-                                std_branch_length = 0
-                                mean_branch_angle = 0
-                                median_branch_angle = 0
-                                std_branch_angle = 0
-
-                    if mito_props[r].area > 16:
-                        mito_branch_count.append(number_branches)
-
-                        mito_total_branch_length.append(total_branch_length)
-                        mito_mean_branch_length.append(mean_branch_length)
-                        mito_median_branch_length.append(median_branch_length)
-                        mito_std_branch_length.append(std_branch_length)
-                        mito_mean_branch_angle.append(mean_branch_angle)
-                        mito_median_branch_angle.append(median_branch_angle)
-                        mito_std_branch_angle.append(std_branch_angle)
-
-                        mito_total_density.append(np.sum(dist_transform2[dist_transform2 > 0]))
-                        mito_average_density.append(np.mean(dist_transform2[dist_transform2 > 0]))
-                        mito_median_density.append(np.median(dist_transform2[dist_transform2 > 0]))
+                mito_results = process_mito_props_parallel(file, img, mito_labels, mito_props)
+                for mito_result in mito_results:
+                    mito_area.append(mito_result["area"])
+                    mito_eccentricity.append(mito_result["eccentricity"])
+                    mito_equi_diameter.append(mito_result["equivalent_diameter"])
+                    mito_euler_number.append(mito_result["euler_number"])
+                    mito_extent.append(mito_result["extent"])
+                    mito_major_axis.append(mito_result["major_axis_length"])
+                    mito_minor_axis.append(mito_result["minor_axis_length"])
+                    mito_orientation.append(mito_result["orientation"])
+                    mito_perimeter.append(mito_result["perimeter"])
+                    mito_solidity.append(mito_result["solidity"])
+                    mito_centroid.append(mito_result["centroid"])
+                    mito_centroid_x.append(mito_result["centroid_x"])
+                    mito_centroid_y.append(mito_result["centroid_y"])
+                    mito_branch_count.append(mito_result["branch_count"])
+                    mito_total_branch_length.append(mito_result["total_branch_length"])
+                    mito_mean_branch_length.append(mito_result["mean_branch_length"])
+                    mito_median_branch_length.append(mito_result["median_branch_length"])
+                    mito_std_branch_length.append(mito_result["std_branch_length"])
+                    mito_mean_branch_angle.append(mito_result["mean_branch_angle"])
+                    mito_median_branch_angle.append(mito_result["median_branch_angle"])
+                    mito_std_branch_angle.append(mito_result["std_branch_angle"])
+                    mito_total_density.append(mito_result["total_density"])
+                    mito_average_density.append(mito_result["average_density"])
+                    mito_median_density.append(mito_result["median_density"])
 
                 mito_area = np.multiply(np.power(scale, 2), mito_area)
                 mito_equi_diameter = np.multiply(scale, mito_equi_diameter)
@@ -335,7 +429,7 @@ def measurement(directory_path, save_path):
                 mito_average_density = np.multiply(scale, mito_average_density)
                 mito_median_density = np.multiply(scale, mito_median_density)
 
-                # 单张图片为单位
+                # Per-image summary
                 cell_mito_count = len(mito_area)
                 cell_total_mito_area = np.sum(mito_area)
                 cell_mean_mito_area = np.mean(mito_area)
@@ -668,17 +762,18 @@ def measurement(directory_path, save_path):
             except:
                 print('Cann\'t test {0}'.format(file))
     database.drop(database.index[0], inplace=True)
-    database.to_csv(save_path + "/" + "Distinct image test" + "v.csv", sep=',', index=False)
-    database.to_csv("../final_results/512x512_pixels" + "/" + "Distinct image test" + "v.csv", sep=',', index=False)
+    database.to_csv(save_path / "Distinct image testv.csv", sep=',', index=False)
+    database.to_csv(DEFAULT_PATCH_RESULTS_FOLDER / "Distinct image testv.csv", sep=',', index=False)
 
     database_raw.drop(database_raw.index[0], inplace=True)
-    database_raw.to_csv(save_path + "/" + "Distinct mitochondria test" + ".tsv", sep='\t', index=False)
-    database_raw.to_csv("../final_results/512x512_pixels" + "/" + "Distinct mitochondria test" + ".tsv", sep='\t',
+    database_raw.to_csv(save_path / "Distinct mitochondria test.tsv", sep='\t', index=False)
+    database_raw.to_csv(DEFAULT_PATCH_RESULTS_FOLDER / "Distinct mitochondria test.tsv", sep='\t',
                         index=False)
 
     print('Test has been completed')
 
 
-upload_path = "../final_results/bw"
-save_floder = "../results"
-measurement(upload_path, save_floder)
+if __name__ == "__main__":
+    upload_path = DEFAULT_UPLOAD_PATH
+    save_floder = DEFAULT_SAVE_FOLDER
+    measurement(upload_path, save_floder)

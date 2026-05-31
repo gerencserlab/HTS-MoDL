@@ -1,4 +1,5 @@
 .venv/
+.vscode/
 bin/
 *.pth
 *.npz
@@ -12,3 +13,6 @@ bin/
 *.xlsx
 __pycache__/
 model/*.*
+final_results/*.*
+testraw/*.*
+mytest/*.*
