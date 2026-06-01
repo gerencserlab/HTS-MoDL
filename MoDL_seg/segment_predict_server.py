@@ -36,6 +36,14 @@ def configure_gpu():
     if gpus:
         try:
             tf.config.experimental.set_visible_devices(gpus[0], "GPU")
+            tf.config.set_logical_device_configuration(
+                gpus[0],
+                [
+                    tf.config.LogicalDeviceConfiguration(
+                        memory_limit=12000  # MB
+                    )
+                ],
+            )
         except RuntimeError as exc:
             print(exc)
     else:
