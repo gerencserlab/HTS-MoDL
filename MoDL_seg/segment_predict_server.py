@@ -40,7 +40,7 @@ def configure_gpu():
                 gpus[0],
                 [
                     tf.config.LogicalDeviceConfiguration(
-                        memory_limit=12000  # MB
+                        memory_limit=8192  # MB
                     )
                 ],
             )
