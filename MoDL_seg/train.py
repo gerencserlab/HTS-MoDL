@@ -131,8 +131,8 @@ class myUnet(object):
       imgs_mask_train[imgs_mask_train <= 0.5] = 0
 
       print("loading data done")
-      model = self.get_unet()
-      print("got unet")
+      model = load_model('../model/U-RNet+_orig.hdf5')
+      print("loaded original model")
       model_checkpoint = ModelCheckpoint('../model/U-RNet+.hdf5', monitor='loss',verbose=1, save_best_only=True)
 
 

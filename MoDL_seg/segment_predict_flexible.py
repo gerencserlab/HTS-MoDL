@@ -200,7 +200,8 @@ def extract_patches(image_array, overlap):
 
 def normalize_like_original_script(patches):
     patches = patches.astype("float32") / 255.0
-    patches -= patches.mean(axis=0)
+    # patches -= patches.mean(axis=0)
+    patches -= patches.mean()
     return patches
 
 
