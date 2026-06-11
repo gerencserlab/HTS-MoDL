@@ -15,6 +15,7 @@ from tensorflow.keras.models import load_model
 import tifffile
 
 from segment_predict_flexible import (
+    DEFAULT_WEIGHTS,
     PATCH_SIZE,
     convert_to_uint8,
     extract_patches,
@@ -22,6 +23,7 @@ from segment_predict_flexible import (
     read_grayscale_array,
     resize_array,
     resize_outputs_to_original,
+    resolve_weights_path,
 )
 
 
@@ -85,7 +87,7 @@ def load_cached_model(model_path):
     global model
     global prev_model_path
 
-    model_path = str(Path(model_path).resolve())
+    model_path = str(resolve_weights_path(model_path).resolve())
     if prev_model_path != model_path or model is None:
         print(f"Loading MoDL model: {model_path}")
         model = load_model(model_path)
@@ -237,9 +239,8 @@ def segment():
     print("Segmenting with MoDL")
     print(request.form)
 
-    repo_root = Path(__file__).resolve().parents[1]
     img_path = request.form["--dir"]
-    requested_model = request.form.get("--model", str(repo_root / "model" / "U-RNet+.hdf5"))
+    requested_model = request.form.get("--weights", request.form.get("--model", DEFAULT_WEIGHTS))
 
     image_list = resolve_image_list(img_path)
     if not image_list:

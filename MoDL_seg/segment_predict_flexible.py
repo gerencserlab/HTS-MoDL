@@ -11,6 +11,9 @@ import tifffile
 
 
 PATCH_SIZE = 512
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+MODEL_DIR = PROJECT_ROOT / "model"
+DEFAULT_WEIGHTS = "U-RNet+.hdf5"
 
 
 def get_resample_filter():
@@ -31,24 +34,38 @@ def configure_gpu():
         tf.config.set_visible_devices([], "GPU")
 
 
+def resolve_weights_path(weights):
+    weights_path = Path(weights)
+    if not weights_path.suffix:
+        weights_path = weights_path.with_suffix(".hdf5")
+
+    if weights_path.is_absolute() or weights_path.parent != Path("."):
+        return weights_path
+    return MODEL_DIR / weights_path
+
+
 def parse_args():
-    repo_root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(
         description="Segment arbitrary-sized images with U-RNet+ using 512x512 tiled prediction."
     )
     parser.add_argument(
         "--input",
-        default=str(repo_root / "testraw"),
+        default=str(PROJECT_ROOT / "testraw"),
         help="Input image file or directory. Directories process common image files.",
     )
     parser.add_argument(
+        "--weights",
         "--model",
-        default=str(repo_root / "model" / "U-RNet+.hdf5"),
-        help="Path to U-RNet+.hdf5.",
+        dest="weights",
+        default=DEFAULT_WEIGHTS,
+        help=(
+            "Model weights filename or path. Filename-only values are loaded from "
+            f"{MODEL_DIR}; .hdf5 is appended when omitted."
+        ),
     )
     parser.add_argument(
         "--output",
-        default=str(repo_root / "final_results" / "flexible"),
+        default=str(PROJECT_ROOT / "final_results" / "flexible"),
         help="Output directory for masks and overlays.",
     )
     parser.add_argument(
@@ -307,7 +324,8 @@ def main():
     if not image_paths:
         raise FileNotFoundError(f"No input images found in {args.input}")
 
-    model = load_model(args.model)
+    weights_path = resolve_weights_path(args.weights)
+    model = load_model(str(weights_path))
     for image_path in image_paths:
         segment_image(
             model=model,
