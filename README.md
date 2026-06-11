@@ -16,9 +16,19 @@ MoDL is a deep learning-based software package for precise mitochondrial segment
 ```
 .\.venv\Scripts\python.exe .\MoDL_seg\segment_predict_flexible.py `
   --input .\testraw\your_image.tif `
+  --weights U-RNet+ `
   --overlap 64 `
   --scale 2 `
   --output-original-size
+```
+
+The `--weights` argument selects the segmentation model weights. The default is `U-RNet+.hdf5`. If only a filename is provided, MoDL looks for it in the project `.\model\` folder; the `.hdf5` extension is appended if omitted. A full path can also be supplied.
+
+Examples:
+```
+--weights U-RNet+
+--weights U-RNet+.hdf5
+--weights C:\models\custom_model.hdf5
 ```
 
 ## API usage (POST http://127.0.0.1:5002/segment)
@@ -31,12 +41,14 @@ Invoke-RestMethod -Uri http://127.0.0.1:5002/segment -Method Post -Form @{
   "--scale" = "1.0"
   "--threshold" = "0.7"
   "--batch-size" = "1"
+  "--weights" = "U-RNet+"
 }
 ```
 
 ## API fields
 ```
 --dir
+--weights
 --model
 --overlap
 --scale
@@ -44,6 +56,8 @@ Invoke-RestMethod -Uri http://127.0.0.1:5002/segment -Method Post -Form @{
 --batch-size
 --output-original-size
 ```
+
+`--model` is kept as a backward-compatible alias for `--weights`.
 
 
 
@@ -140,6 +154,8 @@ You need to prepare the training set, segment it into 8-bit images using MoDL, a
 1. Run the ***MoDL_seg/train.py*** to train the model for segmentation. Run the ***MoDL_pre/train.py*** to train the model for function prediction.
 
 2. The trained model will be saved in the *'model'* directory and named ***U-RNet+.hdf5*** for segmentation. The ***.pkl*** file will be saved in the *'model'* directory for function prediction.
+
+   Segmentation prediction can select a different `.hdf5` weights file with `--weights`. Filename-only values are resolved relative to the project *'model'* directory, and `.hdf5` is appended if it is omitted. Full paths are also accepted.
 
 3. The training progress and performance metrics will also be saved in the *'model'* directory after training.
 
