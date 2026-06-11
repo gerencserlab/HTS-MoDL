@@ -1,0 +1,77 @@
+<IAPipeline Description="Image Analyst MKII XML 1.0" Version="1222">
+  <Pipeline Version="1222">
+    <Functions>
+      <fRunEXE Caption="Run EXE" ID="0" PID="162" Description="Run EXE">
+        <Caption>Run EXE</Caption>
+        <Position Top="0" Left="0" Height="25" Width="61"/>
+        <Parameters>
+          <filename ID="0" Type="Text" Value="=&quot;&quot;%ProgramDataFolder%nanopyx\Scripts\activate&quot;  &amp;&amp; &quot;python.exe&quot;&quot;"/>
+          <arguments ID="1" Type="Text" Value="run_esrrf_upscaling.py --serve"/>
+          <format ID="2" Type="Text" Value="AVI"/>
+          <way ID="3" Type="Text" Value="Do not export (reuse)"/>
+          <exportsuffix ID="4" Type="Text" Value=""/>
+          <results ID="5" Type="Text" Value=""/>
+          <resultformat ID="6" Type="Text" Value="Dialog default"/>
+          <usetemp ID="7" Type="Bool" Value="No"/>
+          <customtemp ID="8" Type="Text" Value="=%ExecutingPipelineFolder%"/>
+          <deletetemp ID="9" Type="Bool" Value="No"/>
+          <forceclose ID="10" Type="Bool" Value="No"/>
+          <nowait ID="11" Type="Bool" Value="Yes"/>
+          <loopframes ID="12" Type="Bool" Value="No"/>
+          <parallel ID="13" Type="Integer" Value="1" SValue=""/>
+          <runas ID="14" Type="Bool" Value="No"/>
+          <args1 ID="15" Type="Text" Value=""/>
+          <args2 ID="16" Type="Text" Value=""/>
+          <args3 ID="17" Type="Text" Value=""/>
+          <args4 ID="18" Type="Text" Value=""/>
+          <args5 ID="19" Type="Text" Value=""/>
+          <args6 ID="20" Type="Text" Value=""/>
+          <args7 ID="21" Type="Text" Value=""/>
+          <args8 ID="22" Type="Text" Value=""/>
+          <args9 ID="23" Type="Text" Value=""/>
+          <args10 ID="24" Type="Text" Value=""/>
+        </Parameters>
+        <Inputs Types="" IDs=""/>
+        <Outputs Types="" IDs=""/>
+      </fRunEXE>
+    </Functions>
+  </Pipeline>
+  <Parameters Version="1222">
+    <Caption>Start NanoPyx Server</Caption>
+    <DesignVersion>1</DesignVersion>
+    <Description>Starts Cellpose Server locally to allow fast calling Cellpose segmentation without relaunching Python environment for every image (sets).
+Start Cellpose Server once in a session when you start to work, and leave the command window open as long as it is needed. 
+To stop Cellpose Server, close the command window.
+
+The server will be available at: http://localhost:5001/segment
+The field names for the API call match the parameters of the command line Cellpose, therefore Image Analyst MKII pipelines previously using command line launching Cellpose can be simply switched to using the Cellpose server by replacing in the “Path and filename or URL (*.exe,*.bat,"command &amp;&amp; command")”  parameter:
+
+=""%ProgramDataFolder%cellpose\Scripts\activate"  &amp;&amp; "python.exe""
+
+With
+
+http://localhost:5001/segment
+
+Command line parameters translated by cellpose_server.py:
+--dir
+--pretrained_model
+--diameter
+--chan
+--chan2
+--cellprob_threshold
+--flow_threshold
+--batch_size
+
+By default, cellpose_server.py is configured to run Cellpose on GPU.
+Image data is transferred through a temporary folder, similarly to the command line operation of Cellpose.
+</Description>
+    <Parameters/>
+  </Parameters>
+  <Options Version="1222">
+    <usesexcel Value="false"/>
+    <warnrefimage Value="false"/>
+    <warnrefimagemsg Value=""/>
+    <matrixsavedef Value="false"/>
+    <forceshowcmd Value="true"/>
+  </Options>
+</IAPipeline>

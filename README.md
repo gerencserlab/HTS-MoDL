@@ -182,3 +182,7 @@ Implement new features or fix existing issues by creating a pull request.
 ##License
 This project is covered under the GNU General Public 3.0 License.
 
+## List of pipelines
+* [Install MoDL Environment](install_MoDL_environment.md)
+* [Start MoDL Server](MoDL_server.md)
+* [Segment mitochondria with MoDL](Segment_mitochondria_with_MoDL.md)

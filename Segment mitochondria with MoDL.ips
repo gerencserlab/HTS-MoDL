@@ -1,0 +1,290 @@
+<IAPipeline Description="Image Analyst MKII XML 1.0" Version="1222">
+  <Pipeline Version="1222">
+    <Functions>
+      <fInput Caption="Input image" ID="0" PID="0" Description="Input image">
+        <Caption>Input image</Caption>
+        <Position Top="0" Left="13" Height="25" Width="72"/>
+        <Parameters>
+          <image ID="0" Type="Text" Value="[Actual window]"/>
+        </Parameters>
+        <Inputs Types="" IDs=""/>
+        <Outputs Types="C" IDs="1"/>
+      </fInput>
+      <fCopy Caption="Copy" ID="1" PID="4" Description="Copy">
+        <Caption>Copy</Caption>
+        <Position Top="35" Left="50" Height="25" Width="42"/>
+        <Parameters>
+          <linked ID="0" Type="Bool" Value="Yes"/>
+          <frames ID="1" Type="Text" Value="All"/>
+        </Parameters>
+        <Inputs Types="P" IDs="0"/>
+        <Outputs Types="P" IDs="8"/>
+      </fCopy>
+      <fRename Caption="Rename Image" ID="2" PID="18" Description="Rename Image">
+        <Caption>Rename Image</Caption>
+        <Position Top="200" Left="170" Height="25" Width="90"/>
+        <Parameters>
+          <channel ID="0" Type="Integer" Value="26" SValue=""/>
+          <name ID="1" Type="Text" Value="Sum image"/>
+        </Parameters>
+        <Inputs Types="P" IDs="12"/>
+        <Outputs Types="PC" IDs="13;17"/>
+      </fRename>
+      <fWait Caption="Wait for all inputs" ID="3" PID="106" Description="Wait for all inputs">
+        <Caption>Wait for all inputs</Caption>
+        <Position Top="274" Left="58" Height="25" Width="99"/>
+        <Parameters/>
+        <Inputs Types="P" IDs="13"/>
+        <Outputs Types="C" IDs="5"/>
+      </fWait>
+      <fImageAritmeticsIP Caption="Image Arithmetic In Place" ID="4" PID="61" Description="Image Arithmetic In Place">
+        <Caption>Image Arithmetic In Place</Caption>
+        <Position Top="512" Left="51" Height="25" Width="139"/>
+        <Parameters>
+          <type ID="0" Type="Text" Value="*"/>
+          <framerange ID="1" Type="Text" Value="All"/>
+        </Parameters>
+        <Inputs Types="P" IDs="16"/>
+        <Outputs Types="P" IDs="6"/>
+      </fImageAritmeticsIP>
+      <fRunEXE Caption="Run EXE" ID="5" PID="162" Description="Run EXE">
+        <Caption>Run EXE</Caption>
+        <Position Top="319" Left="57" Height="25" Width="61"/>
+        <Parameters>
+          <filename ID="0" Type="Text" Value="http://127.0.0.1:5002/segment"/>
+          <arguments ID="1" Type="Text" Value="--dir --overlap --scale --batch-size --output-original-size --blend-overlap"/>
+          <format ID="2" Type="Text" Value="TIFPadded"/>
+          <way ID="3" Type="Text" Value="Grayscale 8-bit as input#_frame#.ext"/>
+          <exportsuffix ID="4" Type="Text" Value=""/>
+          <results ID="5" Type="Text" Value="1_*_prob.tif"/>
+          <resultformat ID="6" Type="Text" Value="TIFF (*.tif)"/>
+          <usetemp ID="7" Type="Bool" Value="Yes"/>
+          <customtemp ID="8" Type="Text" Value=""/>
+          <deletetemp ID="9" Type="Bool" Value="Yes"/>
+          <forceclose ID="10" Type="Bool" Value="No"/>
+          <nowait ID="11" Type="Bool" Value="No"/>
+          <loopframes ID="12" Type="Bool" Value="No"/>
+          <parallel ID="13" Type="Integer" Value="1" SValue=""/>
+          <runas ID="14" Type="Bool" Value="No"/>
+          <args1 ID="15" Type="Text" Value="=%temp%"/>
+          <args2 ID="16" Type="Text" Value="32"/>
+          <args3 ID="17" Type="Text" Value="1"/>
+          <args4 ID="18" Type="Text" Value="8"/>
+          <args5 ID="19" Type="Text" Value="True"/>
+          <args6 ID="20" Type="Text" Value="True"/>
+          <args7 ID="21" Type="Text" Value=""/>
+          <args8 ID="22" Type="Text" Value=""/>
+          <args9 ID="23" Type="Text" Value=""/>
+          <args10 ID="24" Type="Text" Value=""/>
+        </Parameters>
+        <Inputs Types="P" IDs="3"/>
+        <Outputs Types="P" IDs="7"/>
+      </fRunEXE>
+      <fAdvSegment Caption="Watershed Segmentation" ID="6" PID="78" Description="Watershed Segmentation">
+        <Caption>Watershed Segmentation</Caption>
+        <Position Top="537" Left="52" Height="25" Width="138"/>
+        <Parameters>
+          <type ID="0" Type="Text" Value="Pixel value"/>
+          <way ID="1" Type="Text" Value="Above"/>
+          <value ID="2" Type="Real" Value="20" SValue=""/>
+          <proctype ID="3" Type="Text" Value="Bound uniformly"/>
+          <value2 ID="4" Type="Real" Value="90" SValue=""/>
+          <method ID="5" Type="Text" Value="Watershed(que)"/>
+          <connectivity ID="6" Type="Text" Value="Inf (3x3 rectangular)"/>
+          <separate ID="7" Type="Bool" Value="Yes"/>
+          <weld ID="8" Type="Bool" Value="No"/>
+          <evaluate ID="9" Type="Bool" Value="Yes"/>
+          <textoutput ID="10" Type="Bool" Value="No"/>
+          <keeporigmask ID="11" Type="Bool" Value="No"/>
+          <noedges ID="12" Type="Bool" Value="No"/>
+        </Parameters>
+        <Inputs Types="P" IDs="4"/>
+        <Outputs Types="P" IDs="14"/>
+      </fAdvSegment>
+      <fThreshold Caption="Threshold" ID="7" PID="14" Description="Threshold">
+        <Caption>Threshold</Caption>
+        <Position Top="373" Left="96" Height="25" Width="64"/>
+        <Parameters>
+          <type ID="0" Type="Text" Value="Pixel value"/>
+          <way ID="1" Type="Text" Value="Ceiling"/>
+          <value ID="2" Type="Real" Value="248" SValue=""/>
+          <value2 ID="3" Type="Real" Value="0" SValue=""/>
+          <proctype ID="4" Type="Text" Value="None"/>
+          <keeporigmask ID="5" Type="Bool" Value="No"/>
+        </Parameters>
+        <Inputs Types="P" IDs="5"/>
+        <Outputs Types="CP" IDs="9;10"/>
+      </fThreshold>
+      <fSetScaling Caption="Set scaling/color" ID="8" PID="3" Description="Set scaling/LUT">
+        <Caption>Set scaling/color</Caption>
+        <Position Top="73" Left="21" Height="25" Width="96"/>
+        <Parameters>
+          <lut ID="0" Type="Text" Value="Grayscale"/>
+          <type ID="1" Type="Text" Value="Percentile by frame"/>
+          <pmin ID="2" Type="Real" Value="5" SValue=""/>
+          <pmax ID="3" Type="Real" Value="99.9" SValue=""/>
+          <fmin ID="4" Type="Real" Value="0" SValue=""/>
+          <fmax ID="5" Type="Real" Value="0" SValue=""/>
+          <gamma ID="6" Type="Real" Value="1.3" SValue=""/>
+          <color ID="7" Type="Text" Value=""/>
+        </Parameters>
+        <Inputs Types="P" IDs="1"/>
+        <Outputs Types="P" IDs="11"/>
+      </fSetScaling>
+      <fCopy Caption="Copy" ID="9" PID="4" Description="Copy">
+        <Caption>Copy</Caption>
+        <Position Top="381" Left="0" Height="25" Width="42"/>
+        <Parameters>
+          <linked ID="0" Type="Bool" Value="Yes"/>
+          <frames ID="1" Type="Text" Value="All"/>
+        </Parameters>
+        <Inputs Types="P" IDs="7"/>
+        <Outputs Types="P" IDs="10"/>
+      </fCopy>
+      <fSetSegmentationIntensityClassifiers Caption="Set Segmentation Intensity Classifiers" ID="10" PID="100" Description="Set Segmentation Intensity Classifiers">
+        <Caption>Set Segmentation Intensity Classifiers</Caption>
+        <Position Top="429" Left="6" Height="25" Width="198"/>
+        <Parameters>
+          <type ID="0" Type="Text" Value="Min"/>
+          <mean ID="1" Type="Real" Value="150" SValue=""/>
+          <sum ID="2" Type="Real" Value="0" SValue=""/>
+          <sphmean ID="3" Type="Real" Value="0" SValue=""/>
+          <variance ID="4" Type="Real" Value="0" SValue=""/>
+          <varianceOverMean ID="5" Type="Real" Value="0" SValue=""/>
+          <SDOverMean ID="6" Type="Real" Value="0" SValue=""/>
+        </Parameters>
+        <Inputs Types="PP" IDs="7;9"/>
+        <Outputs Types="P" IDs="16"/>
+      </fSetSegmentationIntensityClassifiers>
+      <fWriteBack Caption="Write back scaled values" ID="11" PID="46" Description="Write back scaled values">
+        <Caption>Write back scaled values</Caption>
+        <Position Top="119" Left="46" Height="25" Width="135"/>
+        <Parameters>
+          <range ID="0" Type="Real" Value="255" SValue=""/>
+          <clip ID="1" Type="Bool" Value="Yes"/>
+        </Parameters>
+        <Inputs Types="P" IDs="8"/>
+        <Outputs Types="P" IDs="12"/>
+      </fWriteBack>
+      <fThreshold Caption="Threshold" ID="12" PID="14" Description="Threshold">
+        <Caption>Threshold</Caption>
+        <Position Top="164" Left="73" Height="25" Width="64"/>
+        <Parameters>
+          <type ID="0" Type="Text" Value="Pixel value"/>
+          <way ID="1" Type="Text" Value="Mask Below"/>
+          <value ID="2" Type="Real" Value="10" SValue=""/>
+          <value2 ID="3" Type="Real" Value="0" SValue=""/>
+          <proctype ID="4" Type="Text" Value="None"/>
+          <keeporigmask ID="5" Type="Bool" Value="No"/>
+        </Parameters>
+        <Inputs Types="P" IDs="11"/>
+        <Outputs Types="P" IDs="2"/>
+      </fThreshold>
+      <fFillMask Caption="Fill Mask" ID="13" PID="89" Description="Fill Mask">
+        <Caption>Fill Mask</Caption>
+        <Position Top="230" Left="66" Height="25" Width="58"/>
+        <Parameters>
+          <value ID="0" Type="Real" Value="0" SValue=""/>
+        </Parameters>
+        <Inputs Types="P" IDs="2"/>
+        <Outputs Types="P" IDs="3"/>
+      </fFillMask>
+      <fSetSegmentationIntensityClassifiers Caption="Set Segmentation Intensity Classifiers" ID="14" PID="100" Description="Set Segmentation Intensity Classifiers">
+        <Caption>Set Segmentation Intensity Classifiers</Caption>
+        <Position Top="600" Left="121" Height="25" Width="198"/>
+        <Parameters>
+          <type ID="0" Type="Text" Value="Min"/>
+          <mean ID="1" Type="Real" Value="20" SValue=""/>
+          <sum ID="2" Type="Real" Value="0" SValue=""/>
+          <sphmean ID="3" Type="Real" Value="0" SValue=""/>
+          <variance ID="4" Type="Real" Value="0" SValue=""/>
+          <varianceOverMean ID="5" Type="Real" Value="0" SValue=""/>
+          <SDOverMean ID="6" Type="Real" Value="0" SValue=""/>
+        </Parameters>
+        <Inputs Types="PP" IDs="6;17"/>
+        <Outputs Types="P" IDs="15"/>
+      </fSetSegmentationIntensityClassifiers>
+      <fReEvSegment Caption="Reevaluate Segments" ID="15" PID="101" Description="Reevaluate Segments">
+        <Caption>Reevaluate Segments</Caption>
+        <Position Top="648" Left="108" Height="25" Width="122"/>
+        <Parameters>
+          <reapply ID="0" Type="Bool" Value="Yes"/>
+          <textoutput ID="1" Type="Bool" Value="No"/>
+          <weld ID="2" Type="Bool" Value="No"/>
+          <noedges ID="3" Type="Bool" Value="No"/>
+        </Parameters>
+        <Inputs Types="P" IDs="14"/>
+        <Outputs Types="" IDs=""/>
+      </fReEvSegment>
+      <fSetSegmentationClassifiers Caption="Set Segmentation Classifiers" ID="16" PID="48" Description="Set Segmentation Classifiers">
+        <Caption>Set Segmentation Classifiers</Caption>
+        <Position Top="467" Left="20" Height="25" Width="156"/>
+        <Parameters>
+          <type ID="0" Type="Text" Value="Min"/>
+          <volume ID="1" Type="Integer" Value="10" SValue=""/>
+          <surface ID="2" Type="Integer" Value="0" SValue=""/>
+          <maxarea ID="3" Type="Integer" Value="0" SValue=""/>
+          <maxperimeter ID="4" Type="Integer" Value="0" SValue=""/>
+          <maxdiameter ID="5" Type="Real" Value="0" SValue=""/>
+          <shapefactor ID="6" Type="Real" Value="0" SValue=""/>
+          <sphericalshapefactor ID="7" Type="Real" Value="0" SValue=""/>
+          <totalfileamentlength ID="8" Type="Integer" Value="0" SValue=""/>
+          <totalbranchpoints ID="9" Type="Integer" Value="0" SValue=""/>
+          <fiberlength ID="10" Type="Real" Value="0" SValue=""/>
+          <fiberbreadth ID="11" Type="Real" Value="0" SValue=""/>
+          <nearestneighbor ID="12" Type="Real" Value="0" SValue=""/>
+          <numberofneighbors ID="13" Type="Integer" Value="0" SValue=""/>
+          <distancetoedge ID="14" Type="Real" Value="0" SValue=""/>
+          <majoraxislength ID="15" Type="Real" Value="0" SValue=""/>
+          <minoraxislength ID="16" Type="Real" Value="0" SValue=""/>
+          <majoraxisangle ID="17" Type="Real" Value="0" SValue=""/>
+          <aspectratio ID="18" Type="Real" Value="0" SValue=""/>
+          <ellipticity ID="19" Type="Real" Value="0" SValue=""/>
+          <eccentricity ID="20" Type="Real" Value="0" SValue=""/>
+        </Parameters>
+        <Inputs Types="P" IDs="10"/>
+        <Outputs Types="P" IDs="4"/>
+      </fSetSegmentationClassifiers>
+      <fCopy Caption="Copy" ID="17" PID="4" Description="Copy">
+        <Caption>Copy</Caption>
+        <Position Top="330" Left="258" Height="25" Width="42"/>
+        <Parameters>
+          <linked ID="0" Type="Bool" Value="No"/>
+          <frames ID="1" Type="Text" Value="3,6.."/>
+        </Parameters>
+        <Inputs Types="P" IDs="2"/>
+        <Outputs Types="P" IDs="14"/>
+      </fCopy>
+    </Functions>
+  </Pipeline>
+  <Parameters Version="1222">
+    <Caption>Segment mitochondria with MoDL</Caption>
+    <DesignVersion>2</DesignVersion>
+    <Description>This pipeline uses MoDL to segment mitochondria a single channel. 
+</Description>
+    <Parameters>
+      <param ID="4" UID="111011519" Caption="Path and filename or URL (*.exe,*.bat,&quot;command &amp;&amp; command&quot;)" Type="Text" Value="http://127.0.0.1:5002/segment" Constraints="" ErrorMessage="" Hint="filename, without arguments. Filename with full path, or filename only if it is in the environment path. Alternatively, use one or more command prompt expressions with arguments concatenated by &amp;&amp; and the whole expression quoted with &quot;.">
+        <link Caption="Run EXE::Path and filename or URL (*.exe,*.bat,&quot;command &amp;&amp; command&quot;)" ID="5" paramID="0" paramName="filename"/>
+      </param>
+      <param ID="5" UID="111011524" Caption="Argument 2 (--overlap)" Type="Text" Value="32" Constraints="" ErrorMessage="" Hint="Argument entries will be interspersed with the &quot;Argument&quot; entry">
+        <link Caption="Run EXE::Argument 2 (--overlap)" ID="5" paramID="16" paramName="args2"/>
+      </param>
+      <param ID="6" UID="111011525" Caption="Argument 3 (--scale)" Type="Text" Value="1" Constraints="" ErrorMessage="" Hint="Argument entries will be interspersed with the &quot;Argument&quot; entry">
+        <link Caption="Run EXE::Argument 3 (--scale)" ID="5" paramID="17" paramName="args3"/>
+      </param>
+      <param ID="7" UID="111011526" Caption="Argument 4 (--batch-size)" Type="Text" Value="8" Constraints="" ErrorMessage="" Hint="Argument entries will be interspersed with the &quot;Argument&quot; entry">
+        <link Caption="Run EXE::Argument 4 (--batch-size)" ID="5" paramID="18" paramName="args4"/>
+      </param>
+      <param ID="8" UID="111011528" Caption="Argument 5 (--output-original-size)" Type="Text" Value="True" Constraints="" ErrorMessage="" Hint="Argument entries will be interspersed with the &quot;Argument&quot; entry">
+        <link Caption="Run EXE::Argument 5 (--output-original-size)" ID="5" paramID="19" paramName="args5"/>
+      </param>
+    </Parameters>
+  </Parameters>
+  <Options Version="1222">
+    <usesexcel Value="false"/>
+    <warnrefimage Value="false"/>
+    <warnrefimagemsg Value=""/>
+    <matrixsavedef Value="false"/>
+    <forceshowcmd Value="false"/>
+  </Options>
+</IAPipeline>
