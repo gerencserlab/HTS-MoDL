@@ -18,3 +18,8 @@ testraw/*.*
 mytest/*.*
 npydata/
 */__pycache__/
+deform/
+final_results/
+testraw/
+mytest/
+results/
