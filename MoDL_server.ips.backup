@@ -5,8 +5,8 @@
         <Caption>Run EXE</Caption>
         <Position Top="0" Left="0" Height="25" Width="61"/>
         <Parameters>
-          <filename ID="0" Type="Text" Value="=&quot;&quot;%ProgramDataFolder%nanopyx\Scripts\activate&quot;  &amp;&amp; &quot;python.exe&quot;&quot;"/>
-          <arguments ID="1" Type="Text" Value="run_esrrf_upscaling.py --serve"/>
+          <filename ID="0" Type="Text" Value="=&quot;&quot;%ProgramDataFolder%MoDL\Scripts\activate&quot;  &amp;&amp; &quot;python.exe&quot;&quot;"/>
+          <arguments ID="1" Type="Text" Value="MoDL_seg\segment_predict_server.py"/>
           <format ID="2" Type="Text" Value="AVI"/>
           <way ID="3" Type="Text" Value="Do not export (reuse)"/>
           <exportsuffix ID="4" Type="Text" Value=""/>
@@ -37,33 +37,23 @@
     </Functions>
   </Pipeline>
   <Parameters Version="1222">
-    <Caption>Start NanoPyx Server</Caption>
+    <Caption>Start MoDL Server</Caption>
     <DesignVersion>1</DesignVersion>
-    <Description>Starts Cellpose Server locally to allow fast calling Cellpose segmentation without relaunching Python environment for every image (sets).
-Start Cellpose Server once in a session when you start to work, and leave the command window open as long as it is needed. 
-To stop Cellpose Server, close the command window.
+    <Description>Starts MoDL Server locally to allow fast calling MoDL  segmentation without relaunching Python environment for every image (sets).
+Start MoDL Server once in a session when you start to work, and leave the command window open as long as it is needed. 
+To stop MoDL Server, close the command window.
 
-The server will be available at: http://localhost:5001/segment
-The field names for the API call match the parameters of the command line Cellpose, therefore Image Analyst MKII pipelines previously using command line launching Cellpose can be simply switched to using the Cellpose server by replacing in the “Path and filename or URL (*.exe,*.bat,"command &amp;&amp; command")”  parameter:
+The server will be available at: http://localhost:5002/segment
 
-=""%ProgramDataFolder%cellpose\Scripts\activate"  &amp;&amp; "python.exe""
-
-With
-
-http://localhost:5001/segment
-
-Command line parameters translated by cellpose_server.py:
+API fields:
 --dir
---pretrained_model
---diameter
---chan
---chan2
---cellprob_threshold
---flow_threshold
---batch_size
-
-By default, cellpose_server.py is configured to run Cellpose on GPU.
-Image data is transferred through a temporary folder, similarly to the command line operation of Cellpose.
+--weights
+--model
+--overlap
+--scale
+--threshold
+--batch-size
+--output-original-size
 </Description>
     <Parameters/>
   </Parameters>
