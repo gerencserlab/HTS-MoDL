@@ -1,6 +1,9 @@
 # HTS-MoDL
 HTS adaptation of MoDL mitochondrial segmentation and function prediction in live-cell images with deep learning
 
+To cite authors of MoDL: Ding, Yang, Jintao Li, Jiaxin Zhang, et al. “Mitochondrial Segmentation and Function Prediction in Live-Cell Images with Deep Learning.” Nature Communications 16, no. 1 (2025): 743. https://doi.org/10.1038/s41467-025-55825-x.
+
+
 ## Description
 MoDL is a deep learning-based software package for precise mitochondrial segmentation and function prediction in live-cell images, and allows for visualization and outputs detailed data on mitochondrion morphology features and functionality. In this fork of the original repository we adapted MoDL to our high-throughput screening workflows.
 
