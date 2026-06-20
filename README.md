@@ -87,6 +87,17 @@ The executable files and usage instructions for MoDL can be found at "https://ze
 
 MoDL is built with Python and Tensorflow. Technically there are no limits to the operation system to run the code, but Windows system is recommended, on which the software has been tested. The inference process of the MoDL can run using the CPU only, but could be inefficiently. A powerful CUDA-enabled GPU device that can speed up the inference is highly recommended.
 
+CUDA 11:
+https://developer.nvidia.com/cuda-11-8-0-download-archive?target_os=Windows&target_arch=x86_64&target_version=11&target_type=exe_local
+CuDNN :
+https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/windows-x86_64/
+cudnn-windows-x86_64-8.9.7.29_cuda11-archive
+
+
+Both CUDA 11 and cuDNN 8 dll files must be in the path before startin Image Analyst MKII. Adjust if needed and execute setpath-programdata.ps1
+Extract the cuDNN bin/*.dll files in the path in setpath-programdata.ps1.
+
+
 The inference process has been tested with:
 
  * Windows 11 (version 23H2)

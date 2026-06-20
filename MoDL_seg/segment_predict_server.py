@@ -17,6 +17,7 @@ import tifffile
 from segment_predict_flexible import (
     DEFAULT_WEIGHTS,
     PATCH_SIZE,
+    crop_to_output,
     convert_to_uint8,
     extract_patches,
     predict_patches,
@@ -209,9 +210,10 @@ def segment_one(
     original_height, original_width = original_array.shape
     scaled_array = resize_array(original_array, scale)
 
-    patches, positions, output_shape, padded_shape = extract_patches(scaled_array, overlap)
+    patches, positions, output_shape, padded_shape, crop_origin = extract_patches(scaled_array, overlap)
     predictions = predict_patches(model_instance, patches, batch_size)
-    probability = stitch_probabilities_refined(predictions, positions, output_shape, overlap, blend_overlap)
+    probability = stitch_probabilities_refined(predictions, positions, padded_shape, overlap, blend_overlap)
+    probability = crop_to_output(probability, output_shape, crop_origin)
 
     mask = (probability > threshold).astype(np.uint8) * 255
     probability_image = np.clip(probability * 255.0, 0, 255).astype(np.uint8)

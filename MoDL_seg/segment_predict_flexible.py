@@ -190,29 +190,52 @@ def compute_starts(length, patch_size, stride):
     return starts
 
 
+def pad_for_patching(image_array, overlap):
+    border = overlap // 2
+    height, width = image_array.shape
+    pad_mode = "reflect" if height > 1 and width > 1 else "edge"
+
+    if border > 0:
+        image_array = np.pad(
+            image_array,
+            ((border, border), (border, border)),
+            mode=pad_mode,
+        )
+
+    return image_array, (border, border)
+
+
 def extract_patches(image_array, overlap):
     if overlap < 0 or overlap >= PATCH_SIZE:
         raise ValueError("--overlap must be from 0 to 511")
 
     stride = PATCH_SIZE - overlap
     height, width = image_array.shape
-    y_starts = compute_starts(height, PATCH_SIZE, stride)
-    x_starts = compute_starts(width, PATCH_SIZE, stride)
+    patch_array, crop_origin = pad_for_patching(image_array, overlap)
+    patch_height, patch_width = patch_array.shape
+    y_starts = compute_starts(patch_height, PATCH_SIZE, stride)
+    x_starts = compute_starts(patch_width, PATCH_SIZE, stride)
 
     padded_height = y_starts[-1] + PATCH_SIZE
     padded_width = x_starts[-1] + PATCH_SIZE
-    padded = np.zeros((padded_height, padded_width), dtype=np.uint8)
-    padded[:height, :width] = image_array
+    pad_bottom = padded_height - patch_height
+    pad_right = padded_width - patch_width
+    if pad_bottom or pad_right:
+        patch_array = np.pad(
+            patch_array,
+            ((0, pad_bottom), (0, pad_right)),
+            mode="reflect" if patch_height > 1 and patch_width > 1 else "edge",
+        )
 
     patches = []
     positions = []
     for y in y_starts:
         for x in x_starts:
-            patches.append(padded[y:y + PATCH_SIZE, x:x + PATCH_SIZE])
+            patches.append(patch_array[y:y + PATCH_SIZE, x:x + PATCH_SIZE])
             positions.append((y, x))
 
     patches = np.asarray(patches, dtype=np.uint8)[..., np.newaxis]
-    return patches, positions, (height, width), (padded_height, padded_width)
+    return patches, positions, (height, width), (padded_height, padded_width), crop_origin
 
 
 def normalize_like_original_script(patches):
@@ -228,7 +251,13 @@ def predict_patches(model, patches, batch_size):
     return predictions[..., 0]
 
 
-def stitch_probabilities(predictions, positions, output_shape, padded_shape):
+def crop_to_output(probability, output_shape, crop_origin):
+    height, width = output_shape
+    crop_y, crop_x = crop_origin
+    return probability[crop_y:crop_y + height, crop_x:crop_x + width]
+
+
+def stitch_probabilities(predictions, positions, output_shape, padded_shape, crop_origin):
     padded_height, padded_width = padded_shape
     probability_sum = np.zeros((padded_height, padded_width), dtype=np.float32)
     weight_sum = np.zeros((padded_height, padded_width), dtype=np.float32)
@@ -240,8 +269,7 @@ def stitch_probabilities(predictions, positions, output_shape, padded_shape):
         weight_sum[y:y_end, x:x_end] += 1.0
 
     probability = probability_sum / np.maximum(weight_sum, 1.0)
-    height, width = output_shape
-    return probability[:height, :width]
+    return crop_to_output(probability, output_shape, crop_origin)
 
 
 def make_overlay(gray_array, mask):
@@ -282,9 +310,9 @@ def segment_image(
     original_height, original_width = original_array.shape
     scaled_array = resize_array(original_array, scale)
 
-    patches, positions, output_shape, padded_shape = extract_patches(scaled_array, overlap)
+    patches, positions, output_shape, padded_shape, crop_origin = extract_patches(scaled_array, overlap)
     predictions = predict_patches(model, patches, batch_size)
-    probability = stitch_probabilities(predictions, positions, output_shape, padded_shape)
+    probability = stitch_probabilities(predictions, positions, output_shape, padded_shape, crop_origin)
 
     mask = (probability > threshold).astype(np.uint8) * 255
     probability_image = np.clip(probability * 255.0, 0, 255).astype(np.uint8)
