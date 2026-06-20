@@ -27,6 +27,9 @@ from segment_predict_flexible import (
     resolve_weights_path,
 )
 
+# If CUDNN crashes this may help:
+# os.environ.setdefault("TF_CUDNN_USE_AUTOTUNE", "0")
+
 
 app = Flask(__name__)
 prev_model_path = ""
