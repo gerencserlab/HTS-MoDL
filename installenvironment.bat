@@ -1,4 +1,4 @@
-call py -3.9 -m venv "%~2MoDL"
+call py -3.10 -m venv "%~2MoDL"
 c:
 cd "%~2MoDL\Scripts\" 
 call activate.bat

@@ -252,26 +252,30 @@
   </Pipeline>
   <Parameters Version="1222">
     <Caption>Segment mitochondria with MoDL</Caption>
-    <DesignVersion>2</DesignVersion>
-    <Description>This pipeline uses MoDL to segment mitochondria a single channel. 
+    <DesignVersion>1</DesignVersion>
+    <Description>This pipeline uses MoDL to segment mitochondria in a single channel. 
+Download orignal model (super resolution) from: https://zenodo.org/records/6481291
+Download retrained model (spinning disc confocal, 0.18um/pixel) from: https://github.com/gerencserlab/HTS-MoDL/releases/download/U-RNet%2B_1x_50epochs/U-RNet+_1x_50epochs.hdf5
+
+To cite authors of MoDL: Ding, Yang, Jintao Li, Jiaxin Zhang, et al. “Mitochondrial Segmentation and Function Prediction in Live-Cell Images with Deep Learning.” Nature Communications 16, no. 1 (2025): 743. https://doi.org/10.1038/s41467-025-55825-x.
 </Description>
     <Parameters>
       <param ID="0" UID="111011519" Caption="Path and filename or URL (*.exe,*.bat,&quot;command &amp;&amp; command&quot;)" Type="Text" Value="http://127.0.0.1:5002/segment" Constraints="" ErrorMessage="" Hint="filename, without arguments. Filename with full path, or filename only if it is in the environment path. Alternatively, use one or more command prompt expressions with arguments concatenated by &amp;&amp; and the whole expression quoted with &quot;.">
         <link Caption="Run EXE::Path and filename or URL (*.exe,*.bat,&quot;command &amp;&amp; command&quot;)" ID="3" paramID="0" paramName="filename"/>
       </param>
-      <param ID="1" UID="111011524" Caption="Argument 2 (--overlap)" Type="Text" Value="32" Constraints="" ErrorMessage="" Hint="Argument entries will be interspersed with the &quot;Argument&quot; entry">
+      <param ID="1" UID="111011524" Caption="Argument 2 (--overlap)" Type="Text" Value="32" Constraints="" ErrorMessage="" Hint="Overlap of 512x512 patches to avoid edge artifacts">
         <link Caption="Run EXE::Argument 2 (--overlap)" ID="3" paramID="16" paramName="args2"/>
       </param>
-      <param ID="2" UID="111011525" Caption="Argument 3 (--scale)" Type="Text" Value="1" Constraints="" ErrorMessage="" Hint="Argument entries will be interspersed with the &quot;Argument&quot; entry">
+      <param ID="2" UID="111011525" Caption="Argument 3 (--scale)" Type="Text" Value="1" Constraints="" ErrorMessage="" Hint="Up or down scaling to match training and inference resolution">
         <link Caption="Run EXE::Argument 3 (--scale)" ID="3" paramID="17" paramName="args3"/>
       </param>
-      <param ID="3" UID="111011526" Caption="Argument 4 (--batch-size)" Type="Text" Value="8" Constraints="" ErrorMessage="" Hint="Argument entries will be interspersed with the &quot;Argument&quot; entry">
+      <param ID="3" UID="111011526" Caption="Argument 4 (--batch-size)" Type="Text" Value="8" Constraints="" ErrorMessage="" Hint="Batch size (mind your VRAM!)">
         <link Caption="Run EXE::Argument 4 (--batch-size)" ID="3" paramID="18" paramName="args4"/>
       </param>
-      <param ID="4" UID="111011528" Caption="Argument 5 (--output-original-size)" Type="Text" Value="True" Constraints="" ErrorMessage="" Hint="Argument entries will be interspersed with the &quot;Argument&quot; entry">
+      <param ID="4" UID="111011528" Caption="Argument 5 (--output-original-size)" Type="Text" Value="True" Constraints="" ErrorMessage="" Hint="Return original or scaled sized image">
         <link Caption="Run EXE::Argument 5 (--output-original-size)" ID="3" paramID="19" paramName="args5"/>
       </param>
-      <param ID="5" UID="109747793" Caption="Argument 7 (--weights)" Type="Text" Value="C:\0Git\MoDL\model\U-RNet+_1x_50epochs.hdf5" Constraints="" ErrorMessage="" CustomCheck="File" Hint="Argument entries will be interspersed with the &quot;Argument&quot; entry">
+      <param ID="5" UID="109747793" Caption="Argument 7 (--weights)" Type="Text" Value="C:\model\U-RNet+_1x_50epochs.hdf5" Constraints="" ErrorMessage="" CustomCheck="File" Hint="Path to downloaded network weight *.hdf5 file">
         <link Caption="Run EXE::Argument 7 (--weights)" ID="3" paramID="21" paramName="args7"/>
       </param>
       <param ID="6" UID="109747835" Caption="Minimum probability (0-255 range)" Type="Real" Value="150" Constraints="" ErrorMessage="" Hint="Mean of pixel intensities in Image B. Use 0 for not checking">
