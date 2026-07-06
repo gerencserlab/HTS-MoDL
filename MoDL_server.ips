@@ -30,6 +30,16 @@
           <args8 ID="22" Type="Text" Value=""/>
           <args9 ID="23" Type="Text" Value=""/>
           <args10 ID="24" Type="Text" Value=""/>
+          <args11 ID="25" Type="Text" Value=""/>
+          <args12 ID="26" Type="Text" Value=""/>
+          <args13 ID="27" Type="Text" Value=""/>
+          <args14 ID="28" Type="Text" Value=""/>
+          <args15 ID="29" Type="Text" Value=""/>
+          <args16 ID="30" Type="Text" Value=""/>
+          <args17 ID="31" Type="Text" Value=""/>
+          <args18 ID="32" Type="Text" Value=""/>
+          <args19 ID="33" Type="Text" Value=""/>
+          <args20 ID="34" Type="Text" Value=""/>
         </Parameters>
         <Inputs Types="" IDs=""/>
         <Outputs Types="" IDs=""/>

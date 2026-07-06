@@ -74,7 +74,7 @@ def test(test_path):
     # Convert images to float32 and normalize it
     imgs_test = imgdatas.astype('float32')
     imgs_test /= 255
-    mean = imgs_test.mean(axis=0)
+    mean = imgs_test.mean()
     imgs_test -= mean
 
     # Load the trained model and predict

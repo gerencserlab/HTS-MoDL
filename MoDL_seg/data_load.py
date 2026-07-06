@@ -58,7 +58,7 @@ class DataProcess(object):
         train = train.astype('float32')
         mask_train = mask_train.astype('float32')
         train /= 255
-        mean = train.mean(axis=0)
+        mean = train.mean()
         train -= mean
         mask_train /= 255
         mask_train[mask_train > 0.5] = 1
