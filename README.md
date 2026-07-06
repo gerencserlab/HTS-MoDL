@@ -20,7 +20,7 @@ To cite authors of MoDL: Ding, Yang, Jintao Li, Jiaxin Zhang, et al. “Mitochon
 6. Dowload retrained model [U-RNet+_1x_50epochs.hdf5](https://github.com/gerencserlab/HTS-MoDL/releases/download/U-RNet%2B_1x_50epochs/U-RNet+_1x_50epochs.hdf5)
 7. Install Python 3.10 from python.org
 8. [Install CUDA 11.8](https://developer.nvidia.com/cuda-11-8-0-download-archive?target_os=Windows&target_arch=x86_64&target_version=11&target_type=exe_local)
-9. [Install CuDNN 8](https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/windows-x86_64/cudnn-windows-x86_64-8.9.7.29_cuda11-archive)
+9. [Install CuDNN 8](https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/windows-x86_64/cudnn-windows-x86_64-8.9.7.29_cuda11-archive.zip)
 10. Add CUDA and CuDNN to PATH
 11. [Install MoDL Environment](install_MoDL_environment.md)
 12. In every session, MODL Server need to be started with running this pipeline: [Start MoDL Server](MoDL_server.md)
