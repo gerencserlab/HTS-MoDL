@@ -1,5 +1,21 @@
+
+
 # HTS-MoDL
-HTS adaptation of MoDL mitochondrial segmentation and function prediction in live-cell images with deep learning
+HTS adaptation of MoDL mitochondrial segmentation and function prediction in live-cell images with deep learning.
+This repository provides MoDL Server for Image Analyst MKII. MoDL server fast calling mitochondrial segmentation without relaunching Python environment for every image (series). This can be used with any Image Analyst MKII pipeline using the API call (http://localhost:5002/segment).
+
+To cite authors of MoDL: Ding, Yang, Jintao Li, Jiaxin Zhang, et al. “Mitochondrial Segmentation and Function Prediction in Live-Cell Images with Deep Learning.” Nature Communications 16, no. 1 (2025): 743. https://doi.org/10.1038/s41467-025-55825-x.
+
+## Installation
+1. Clone this git in Image Analyst MKII by Edit/Download and Manage Pipelines from GitHub. 
+2. Press the "< > Code" button [above in this page](https://github.com/gerencserlab/HTS-MoDL/) and copy the URL of this git.
+3. Paste the URL in the URL field in the Connect to Git window in Image Analyst MKII.
+4. Press Download.
+5. The pipelines deposited here will appear in the middle section of the Pipelines main menu.
+6. Dowload retrained model [U-RNet+_1x_50epochs.hdf5](https://github.com/gerencserlab/HTS-MoDL/releases/download/U-RNet%2B_1x_50epochs/U-RNet+_1x_50epochs.hdf5)
+7. Launch Install... pipeleine
+8. Launch MoDL server pipleine before image analysis
+
 
 ## Description
 MoDL is a deep learning-based software package for precise mitochondrial segmentation and function prediction in live-cell images, and allows for visualization and outputs detailed data on mitochondrion morphology features and functionality. In this fork of the original repository we adapted MoDL to our high-throughput screening workflows.
@@ -84,13 +100,24 @@ The executable files and usage instructions for MoDL can be found at "https://ze
 
 MoDL is built with Python and Tensorflow. Technically there are no limits to the operation system to run the code, but Windows system is recommended, on which the software has been tested. The inference process of the MoDL can run using the CPU only, but could be inefficiently. A powerful CUDA-enabled GPU device that can speed up the inference is highly recommended.
 
+CUDA 11:
+https://developer.nvidia.com/cuda-11-8-0-download-archive?target_os=Windows&target_arch=x86_64&target_version=11&target_type=exe_local
+CuDNN :
+https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/windows-x86_64/
+cudnn-windows-x86_64-8.9.7.29_cuda11-archive
+
+
+Both CUDA 11 and cuDNN 8 dll files must be in the path before startin Image Analyst MKII. Adjust if needed and execute setpath-programdata.ps1
+Extract the cuDNN bin/*.dll files in the path in setpath-programdata.ps1.
+
+
 The inference process has been tested with:
 
  * Windows 11 (version 23H2)
- * Python 3.8.10 (Maybe 3.9, but not higher) (64 bit)
+ * Python 3.10 works (64 bit)
  * tensorflow 2.5.0
  * 11th Gen Intel(R) Core(TM) i7-11700 @ 2.50GHz
- * NVIDIA GeForce RTX 3060 Ti
+ * NVIDIA GeForce RTX 3060 Ti, 3090, 4090, 5080 works
 
 ***
 
