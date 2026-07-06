@@ -1,7 +1,20 @@
+
+
 # HTS-MoDL
-HTS adaptation of MoDL mitochondrial segmentation and function prediction in live-cell images with deep learning
+HTS adaptation of MoDL mitochondrial segmentation and function prediction in live-cell images with deep learning.
+This repository provides MoDL Server for Image Analyst MKII. MoDL server fast calling mitochondrial segmentation without relaunching Python environment for every image (series). This can be used with any Image Analyst MKII pipeline using the API call (http://localhost:5002/segment).
 
 To cite authors of MoDL: Ding, Yang, Jintao Li, Jiaxin Zhang, et al. “Mitochondrial Segmentation and Function Prediction in Live-Cell Images with Deep Learning.” Nature Communications 16, no. 1 (2025): 743. https://doi.org/10.1038/s41467-025-55825-x.
+
+## Installation
+1. Clone this git in Image Analyst MKII by Edit/Download and Manage Pipelines from GitHub. 
+2. Press the "< > Code" button [above in this page](https://github.com/gerencserlab/HTS-MoDL/) and copy the URL of this git.
+3. Paste the URL in the URL field in the Connect to Git window in Image Analyst MKII.
+4. Press Download.
+5. The pipelines deposited here will appear in the middle section of the Pipelines main menu.
+6. Dowload retrained model [U-RNet+_1x_50epochs.hdf5](https://github.com/gerencserlab/HTS-MoDL/releases/download/U-RNet%2B_1x_50epochs/U-RNet+_1x_50epochs.hdf5)
+7. Launch Install... pipeleine
+8. Launch MoDL server pipleine before image analysis
 
 
 ## Description
@@ -101,10 +114,10 @@ Extract the cuDNN bin/*.dll files in the path in setpath-programdata.ps1.
 The inference process has been tested with:
 
  * Windows 11 (version 23H2)
- * Python 3.8.10 (Maybe 3.9, but not higher) (64 bit)
+ * Python 3.10 works (64 bit)
  * tensorflow 2.5.0
  * 11th Gen Intel(R) Core(TM) i7-11700 @ 2.50GHz
- * NVIDIA GeForce RTX 3060 Ti
+ * NVIDIA GeForce RTX 3060 Ti, 3090, 4090, 5080 works
 
 ***
 
